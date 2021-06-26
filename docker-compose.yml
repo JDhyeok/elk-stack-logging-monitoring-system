@@ -49,7 +49,7 @@ services:
       - ./nginx/log:/var/log/nginx
 
   filebeat:
-    build: ./filebeat
+    build: ./elkstack/filebeat
     entrypoint: "filebeat -e -strict.perms=false"
     volumes:
       - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
