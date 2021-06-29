@@ -29,7 +29,7 @@ services:
     build: ./elkstack/logstash
     restart: always
     volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
+      - ./elkstack/logstash/pipeline:/usr/share/logstash/pipeline
     ports:
       - "5000:5000"
       - "9600:9600"
@@ -52,7 +52,7 @@ services:
     build: ./elkstack/filebeat
     entrypoint: "filebeat -e -strict.perms=false"
     volumes:
-      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./elkstack/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - ./nginx/log:/var/log/nginx
     links:
       - logstash
