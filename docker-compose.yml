@@ -1,6 +1,25 @@
 version: "3"
 
 services:
+
+  django:
+    build:
+      context: ./mysite
+      args:
+        DJANGO_ALLOWED_HOSTS: '*'
+        DJANGO_SECRET_KEY: '*'
+        DJANGO_CORS_ORIGIN_WHITELIST: '*'
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000:8000
+    volumes:
+      - ./mysite/:/mysite/
+    expose:
+      - 8000
+    env_file:
+      - .env
+
+
   elasticsearch:
     build: ./elkstack/elasticsearch
     restart: always
@@ -12,8 +31,8 @@ services:
       - ./elkstack/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     environment:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-    # depends_on:
-    #   - backend
+    depends_on:
+      - django
 
   kibana:
     build: ./elkstack/kibana
@@ -29,7 +48,8 @@ services:
     build: ./elkstack/logstash
     restart: always
     volumes:
-      - ./elkstack/logstash/pipeline:/usr/share/logstash/pipeline
+      - ./elkstack/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./elkstack/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
     ports:
       - "5000:5000"
       - "9600:9600"
@@ -40,22 +60,22 @@ services:
     depends_on:
       - elasticsearch
     
-  nginx:
-    build: ./nginx
-    ports:
-      - 80:8000
-    volumes:
-      - ./nginx/config:/etc/nginx/conf.d
-      - ./nginx/log:/var/log/nginx
+  # nginx:
+  #   build: ./nginx
+  #   ports:
+  #     - 80:8000
+  #   volumes:
+  #     - ./nginx/config:/etc/nginx/conf.d
+  #     - ./nginx/log:/var/log/nginx
 
-  filebeat:
-    build: ./elkstack/filebeat
-    entrypoint: "filebeat -e -strict.perms=false"
-    volumes:
-      - ./elkstack/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - ./nginx/log:/var/log/nginx
-    links:
-      - logstash
+  # filebeat:
+  #   build: ./elkstack/filebeat
+  #   entrypoint: "filebeat -e -strict.perms=false"
+  #   volumes:
+  #     - ./elkstack/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+  #     - ./nginx/log:/var/log/nginx
+  #   links:
+  #     - logstash
 
 volumes:
   esdata:
