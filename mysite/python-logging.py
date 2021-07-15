@@ -2,7 +2,7 @@ import logging
 import logstash
 import sys
 
-host = 'localhost'
+host = 'logstash'
 
 test_logger = logging.getLogger('python-logstash-logger')
 test_logger.setLevel(logging.INFO)
@@ -11,7 +11,7 @@ test_logger.setLevel(logging.INFO)
 # test_logger.addHandler(logstash.LogstashHandler(host, 12201, version=1))
 
 # TCP
-test_logger.addHandler(logstash.TCPLogstashHandler(host, 5000, version=1))
+test_logger.addHandler(logstash.TCPLogstashHandler(host, 5044, version=1))
 
 test_logger.error('python-logstash: test logstash error message.')
 test_logger.info('python-logstash: test logstash info message.')
