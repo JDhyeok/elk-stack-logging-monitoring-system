@@ -1,1 +1,1 @@
-# nginx-elk-logging-system
+# elk-stack-logging-monitoring-system
