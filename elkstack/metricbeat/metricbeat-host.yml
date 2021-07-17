@@ -19,18 +19,25 @@ metricbeat.modules:
 
 #-------------------------- Elasticsearch output ------------------------------
 output.elasticsearch:
-  username: "metricbeat_anonymous_user"
-  #password: ""
-  hosts: ["http://elasticsearch:9200"]
+  username: "handshaker"
+  password: "zoomin"
+  hosts: ["elasticsearch:9200"]
+  index: "metricbeat-%{[agent.version]}"
+  ssl.verification_mode: full
+  
+
 
 setup.kibana:
-  host: "http://kibana:5601"
-
+  host: "kibana:5601"
+  dashbords.always_kibana: true
 #============================== Dashboards =====================================
 # These settings control loading the sample dashboards to the Kibana index. Loading
 # the dashboards is disabled by default and can be enabled either by setting the
 # options here, or by using the `-setup` CLI flag.
+
 setup.dashboards.enabled: true
+setup.template.overwrite: false
+
 
 logging.level: warning
 logging.to_files: true
