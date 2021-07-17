@@ -31,8 +31,6 @@ services:
       - ./elkstack/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     environment:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-    env_file:
-      - .env.elk
     depends_on:
       - django
     # networks:
