@@ -1,4 +1,4 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.13.2
 
 # Add your elasticsearch plugins setup here
 # USER root

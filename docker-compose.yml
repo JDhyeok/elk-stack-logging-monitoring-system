@@ -31,8 +31,12 @@ services:
       - ./elkstack/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     environment:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    env_file:
+      - .env.elk
     depends_on:
       - django
+    # networks:
+    #   - elk-network
 
   kibana:
     build: ./elkstack/kibana
@@ -43,6 +47,8 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
+    # networks:
+    #   - elk-network
       
   logstash:
     build: ./elkstack/logstash
@@ -59,7 +65,36 @@ services:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     depends_on:
       - elasticsearch
+    # networks:
+    #   - elk-network
     
+  # Specific container and configuration to monitor the HOST (filesystem, memory, processes,...)
+  metricbeat-host:
+    build:
+      context: ./elkstack/metricbeat
+      args:
+        - METRICBEAT_FILE=metricbeat-host.yml
+    container_name: metricbeat-metricbeat-host
+    command: -system.hostfs=/hostfs
+    volumes:
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - "WAIT_FOR_HOSTS=elasticsearch:9200 kibana:5601"
+      - "HOST_ELASTICSEARCH=elasticsearch:9200"
+      - "HOST_KIBANA=kibana:5601"
+    depends_on: 
+      - elasticsearch
+      - kibana
+    # networks:
+    #   - elk-network
+    # extra_hosts:
+    #   - "elasticsearch:172.17.0.1" # The IP of docker0 interface to access host from container
+    #   - "kibana:172.17.0.1" # The IP of docker0 interface to access host from container
+    # network_mode: host # Mandatory to monitor HOST filesystem, memory, processes,...
+
   # nginx:
   #   build: ./nginx
   #   ports:
@@ -79,3 +114,7 @@ services:
 
 volumes:
   esdata:
+
+networks:
+  elk-network:
+    name: elkstack
