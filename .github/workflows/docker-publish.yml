@@ -27,17 +27,8 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      DEBUG=1
-      SECRET_KEY=uwk9+a6m4wi06fa2w^gr91(bbr_2c071!5at=&0$kb0@7hpq!9
-      DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
-      SQL_ENGINE=django.db.backends.postgresql
-      SQL_DATABASE=db_handshaker
-      SQL_USER=handshaker
-      SQL_PASSWORD=zoomin
-      SQL_HOST=db
-      SQL_PORT=5432
-      
+    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -69,9 +60,21 @@ jobs:
       #     push: ${{ github.event_name != 'pull_request' }}
       #     tags: ${{ steps.meta.outputs.tags }}
       #     labels: ${{ steps.meta.outputs.labels }}
+      - name: Create env file
+        run : |
+          touch .env
+          echo DEBUG=1 >> .env
+          echo SECRET_KEY=uwk9+a6m4wi06fa2w^gr91(bbr_2c071!5at=&0$kb0@7hpq!9 >> .env
+          echo DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1] >> .env
+          echo SQL_ENGINE=django.db.backends.postgresql >> .env
+          echo SQL_DATABASE=db_handshaker >> .env
+          echo SQL_USER=handshaker >> .env
+          echo SQL_PASSWORD=zoomin >> .env
+          echo SQL_HOST=db >> .env
+          echo SQL_PORT=5432 >> .env
 
       - name: Start containers
         run: docker-compose up -d --build
-      
+
       - name: Stop containers
         run: docker-compose down
