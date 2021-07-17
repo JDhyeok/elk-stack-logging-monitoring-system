@@ -64,7 +64,7 @@ jobs:
         run : |
           touch .env
           echo DEBUG=1 >> .env
-          echo SECRET_KEY=uwk9+a6m4wi06fa2w^gr91(bbr_2c071!5at=&0$kb0@7hpq!9 >> .env
+          echo SECRET_KEY=uwk9+a6m4wi06fa2w^gr91bbr_2c071!5at=&0$kb0@7hpq!9 >> .env
           echo DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1] >> .env
           echo SQL_ENGINE=django.db.backends.postgresql >> .env
           echo SQL_DATABASE=db_handshaker >> .env
@@ -72,6 +72,7 @@ jobs:
           echo SQL_PASSWORD=zoomin >> .env
           echo SQL_HOST=db >> .env
           echo SQL_PORT=5432 >> .env
+          cat .env
 
       - name: Start containers
         run: docker-compose up -d --build
