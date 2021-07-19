@@ -86,6 +86,7 @@ services:
     depends_on: 
       - elasticsearch
       - kibana
+    restart: always
     # networks:
     #   - elk-network
     # extra_hosts:

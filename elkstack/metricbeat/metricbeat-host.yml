@@ -14,12 +14,14 @@ metricbeat.modules:
 - module: docker
   metricsets: ["container", "cpu", "diskio", "healthcheck", "info", "memory", "network"]
   hosts: ["unix:///var/run/docker.sock"]
+
+
   enabled: true
   period: 5s
 
 #-------------------------- Elasticsearch output ------------------------------
 output.elasticsearch:
-  username: "handshaker"
+  username: "ek_handshaker"
   password: "zoomin"
   hosts: ["elasticsearch:9200"]
   index: "metricbeat-%{[agent.version]}"
@@ -30,6 +32,7 @@ output.elasticsearch:
 setup.kibana:
   host: "kibana:5601"
   dashbords.always_kibana: true
+  ssl.verification_mode: full
 #============================== Dashboards =====================================
 # These settings control loading the sample dashboards to the Kibana index. Loading
 # the dashboards is disabled by default and can be enabled either by setting the

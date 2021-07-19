@@ -15,7 +15,7 @@ metricbeat.modules:
 
 #-------------------------- Elasticsearch output ------------------------------
 output.elasticsearch:
-  username: "handshaker"
+  username: "ek_handshaker"
   password: "zoomin"
   hosts: ["elasticsearch:9200"]
 
