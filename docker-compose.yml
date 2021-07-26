@@ -1,93 +1,112 @@
 version: "3"
 
 services:
-
-  django:
-    build:
-      context: ./mysite
-      args:
-        DJANGO_ALLOWED_HOSTS: '*'
-        DJANGO_SECRET_KEY: '*'
-        DJANGO_CORS_ORIGIN_WHITELIST: '*'
-    command: python manage.py runserver 0.0.0.0:8000
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
     ports:
-      - 8000:8000
-    volumes:
-      - ./mysite/:/mysite/
-    expose:
-      - 8000
-    env_file:
-      - .env
-    deploy:
-      mode: global
-    networks:
-      - elastic
-      - app
+      - 2181:2181
 
-
-  elasticsearch:
-    build: ./elkstack/elasticsearch
-    restart: always
+  kafka:
+    image: wurstmeister/kafka:latest
+    depends_on: 
+      - zookeeper
     ports:
-      - "9200:9200"
-      - "9300:9300"
-    volumes:
-      - esdata:/usr/share/elasticsearch/data
-      - ./elkstack/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - 9092:9092
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-    depends_on:
-      - django
-    deploy:
-      mode: global
-    networks:
-      - elastic
-
-  kibana:
-    build: ./elkstack/kibana
-    restart: always
+      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_CREATE_TOPICS: "test:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
-      - ./elkstack/kibana//kibana.yml:/usr/share/kibana/config/kibana.yml
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
-    networks:
-      - elastic
-    deploy:
-      mode: global
+      - /var/run/docker.sock:/var/run/docker.sock
+
+
+  # django:
+  #   build:
+  #     context: ./mysite
+  #     args:
+  #       DJANGO_ALLOWED_HOSTS: '*'
+  #       DJANGO_SECRET_KEY: '*'
+  #       DJANGO_CORS_ORIGIN_WHITELIST: '*'
+  #   command: python manage.py runserver 0.0.0.0:8000
+  #   ports:
+  #     - 8000:8000
+  #   volumes:
+  #     - ./mysite/:/mysite/
+  #   expose:
+  #     - 8000
+  #   env_file:
+  #     - .env
+  #   deploy:
+  #     mode: global
+  #   networks:
+  #     - elastic
+  #     - app
+
+
+  # elasticsearch:
+  #   build: ./elkstack/elasticsearch
+  #   restart: always
+  #   ports:
+  #     - "9200:9200"
+  #     - "9300:9300"
+  #   volumes:
+  #     - esdata:/usr/share/elasticsearch/data
+  #     - ./elkstack/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+  #   environment:
+  #     ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+  #   depends_on:
+  #     - django
+  #   deploy:
+  #     mode: global
+  #   networks:
+  #     - elastic
+
+  # kibana:
+  #   build: ./elkstack/kibana
+  #   restart: always
+  #   volumes:
+  #     - ./elkstack/kibana//kibana.yml:/usr/share/kibana/config/kibana.yml
+  #   ports:
+  #     - "5601:5601"
+  #   depends_on:
+  #     - elasticsearch
+  #   networks:
+  #     - elastic
+  #   deploy:
+  #     mode: global
       
-  logstash:
-    build: ./elkstack/logstash
-    restart: always
-    volumes:
-      - ./elkstack/logstash/pipeline:/usr/share/logstash/pipeline:ro
-      - ./elkstack/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-    ports:
-      - "5000:5000"
-      - "9600:9600"
-    expose:
-      - "5044"
-    environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-    depends_on:
-      - elasticsearch
-    networks:
-      - elastic
-    deploy:
-      mode: global
+  # logstash:
+  #   build: ./elkstack/logstash
+  #   restart: always
+  #   volumes:
+  #     - ./elkstack/logstash/pipeline:/usr/share/logstash/pipeline:ro
+  #     - ./elkstack/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+  #   ports:
+  #     - "5000:5000"
+  #     - "9600:9600"
+  #   expose:
+  #     - "5044"
+  #   environment:
+  #     ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+  #   depends_on:
+  #     - elasticsearch
+  #   networks:
+  #     - elastic
+  #   deploy:
+  #     mode: global
     
 
-  nginx:
-    build: ./nginx
-    ports:
-      - 80:8000
-    volumes:
-      - ./nginx/config:/etc/nginx/conf.d
-      - ./nginx/log:/var/log/nginx
-    deploy:
-      mode: global
+  # nginx:
+  #   build: ./nginx
+  #   ports:
+  #     - 80:8000
+  #   volumes:
+  #     - ./nginx/config:/etc/nginx/conf.d
+  #     - ./nginx/log:/var/log/nginx
+  #   deploy:
+  #     mode: global
 
 
-volumes:
-  esdata:
+# volumes:
+#   esdata:
