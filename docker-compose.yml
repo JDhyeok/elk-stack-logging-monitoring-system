@@ -18,6 +18,11 @@ services:
       - 8000
     env_file:
       - .env
+    deploy:
+      mode: global
+    networks:
+      - elastic
+      - app
 
 
   elasticsearch:
@@ -33,8 +38,10 @@ services:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     depends_on:
       - django
-    # networks:
-    #   - elk-network
+    deploy:
+      mode: global
+    networks:
+      - elastic
 
   kibana:
     build: ./elkstack/kibana
@@ -45,8 +52,10 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
-    # networks:
-    #   - elk-network
+    networks:
+      - elastic
+    deploy:
+      mode: global
       
   logstash:
     build: ./elkstack/logstash
@@ -63,57 +72,22 @@ services:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     depends_on:
       - elasticsearch
-    # networks:
-    #   - elk-network
+    networks:
+      - elastic
+    deploy:
+      mode: global
     
-  # Specific container and configuration to monitor the HOST (filesystem, memory, processes,...)
-  metricbeat-host:
-    build:
-      context: ./elkstack/metricbeat
-      args:
-        - METRICBEAT_FILE=metricbeat-host.yml
-    container_name: metricbeat-metricbeat-host
-    command: -system.hostfs=/hostfs
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:8000
     volumes:
-      - /proc:/hostfs/proc:ro
-      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-      - /:/hostfs:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - "WAIT_FOR_HOSTS=elasticsearch:9200 kibana:5601"
-      - "HOST_ELASTICSEARCH=elasticsearch:9200"
-      - "HOST_KIBANA=kibana:5601"
-    depends_on: 
-      - elasticsearch
-      - kibana
-    restart: always
-    # networks:
-    #   - elk-network
-    # extra_hosts:
-    #   - "elasticsearch:172.17.0.1" # The IP of docker0 interface to access host from container
-    #   - "kibana:172.17.0.1" # The IP of docker0 interface to access host from container
-    # network_mode: host # Mandatory to monitor HOST filesystem, memory, processes,...
+      - ./nginx/config:/etc/nginx/conf.d
+      - ./nginx/log:/var/log/nginx
+    deploy:
+      mode: global
 
-  # nginx:
-  #   build: ./nginx
-  #   ports:
-  #     - 80:8000
-  #   volumes:
-  #     - ./nginx/config:/etc/nginx/conf.d
-  #     - ./nginx/log:/var/log/nginx
-
-  # filebeat:
-  #   build: ./elkstack/filebeat
-  #   entrypoint: "filebeat -e -strict.perms=false"
-  #   volumes:
-  #     - ./elkstack/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
-  #     - ./nginx/log:/var/log/nginx
-  #   links:
-  #     - logstash
 
 volumes:
   esdata:
-
-networks:
-  elk-network:
-    name: elkstack
