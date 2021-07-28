@@ -3,6 +3,7 @@ version: "3"
 services:
   grafana:
     image: grafana/grafana
+    user: "472"
     depends_on:
       - elasticsearch
     ports:
@@ -68,23 +69,23 @@ services:
   #   deploy:
   #     mode: global
       
-  # logstash:
-  #   build: ./elkstack/logstash
-  #   restart: always
-  #   volumes:
-  #     - ./elkstack/logstash/pipeline:/usr/share/logstash/pipeline:ro
-  #     - ./elkstack/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-  #   ports:
-  #     - "5000:5000"
-  #     - "9600:9600"
-  #   expose:
-  #     - "5044"
-  #   environment:
-  #     ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-  #   depends_on:
-  #     - elasticsearch
-  #   deploy:
-  #     mode: global
+  logstash:
+    build: ./elkstack/logstash
+    restart: always
+    volumes:
+      - ./elkstack/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./elkstack/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+    ports:
+      - "5000:5000"
+      - "9600:9600"
+    expose:
+      - "5044"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    depends_on:
+      - elasticsearch
+    deploy:
+      mode: global
     
 
   # nginx:
