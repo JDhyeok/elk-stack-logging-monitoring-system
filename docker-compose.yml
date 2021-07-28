@@ -8,12 +8,13 @@ services:
       - elasticsearch
     ports:
       - 3000:3000
-    volumes:
-      - ./grafana/data:/var/lib/grafana
-      - ./grafana/provisioning/:/etc/grafana/provisioning/
+#    volumes:
+#      - ./grafana/data:/var/lib/grafana
+#      - ./grafana/provisioning/:/etc/grafana/provisioning/
     environment: 
       - GF_SECURITY_ADMIN_PASSWORD=1q2w3e
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_JAVA_OPTS=-Xmx256m -Xms256m
     restart: always
   # django:
   #   build:
