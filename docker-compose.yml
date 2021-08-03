@@ -1,23 +1,43 @@
 version: "3"
 
 services:
-
-  django:
-    build:
-      context: ./mysite
-      args:
-        DJANGO_ALLOWED_HOSTS: '*'
-        DJANGO_SECRET_KEY: '*'
-        DJANGO_CORS_ORIGIN_WHITELIST: '*'
-    command: python manage.py runserver 0.0.0.0:8000
+  grafana:
+    image: grafana/grafana
+    user: "472"
+    depends_on:
+      - elasticsearch
     ports:
-      - 8000:8000
+      - 3000:3000
     volumes:
-      - ./mysite/:/mysite/
-    expose:
-      - 8000
-    env_file:
-      - .env
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    environment: 
+      - GF_SECURITY_ADMIN_PASSWORD=1q2w3e
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_JAVA_OPTS=-Xmx256m -Xms256m
+      - GF_INSTALL_PLUGINS=grafana-worldmap-panel
+    restart: always
+  # django:
+  #   build:
+  #     context: ./mysite
+  #     args:
+  #       DJANGO_ALLOWED_HOSTS: '*'
+  #       DJANGO_SECRET_KEY: '*'
+  #       DJANGO_CORS_ORIGIN_WHITELIST: '*'
+  #   command: python manage.py runserver 0.0.0.0:8000
+  #   ports:
+  #     - 8000:8000
+  #   volumes:
+  #     - ./mysite/:/mysite/
+  #   expose:
+  #     - 8000
+  #   env_file:
+  #     - .env
+  #   deploy:
+  #     mode: global
+  #   networks:
+  #     - elastic
+  #     - app
 
 
   elasticsearch:
@@ -31,22 +51,23 @@ services:
       - ./elkstack/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     environment:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-    depends_on:
-      - django
-    # networks:
-    #   - elk-network
+    # depends_on:
+    #   - django
+    deploy:
+      mode: global
+
 
   kibana:
     build: ./elkstack/kibana
     restart: always
-    volumes:
-      - ./elkstack/kibana//kibana.yml:/usr/share/kibana/config/kibana.yml
+    # volumes:
+      # - ./elkstack/kibana//kibana.yml:/usr/share/kibana/config/kibana.yml
     ports:
       - "5601:5601"
     depends_on:
       - elasticsearch
-    # networks:
-    #   - elk-network
+    deploy:
+      mode: global
       
   logstash:
     build: ./elkstack/logstash
@@ -63,36 +84,9 @@ services:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     depends_on:
       - elasticsearch
-    # networks:
-    #   - elk-network
+    deploy:
+      mode: global
     
-  # Specific container and configuration to monitor the HOST (filesystem, memory, processes,...)
-  metricbeat-host:
-    build:
-      context: ./elkstack/metricbeat
-      args:
-        - METRICBEAT_FILE=metricbeat-host.yml
-    container_name: metricbeat-metricbeat-host
-    command: -system.hostfs=/hostfs
-    volumes:
-      - /proc:/hostfs/proc:ro
-      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-      - /:/hostfs:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - "WAIT_FOR_HOSTS=elasticsearch:9200 kibana:5601"
-      - "HOST_ELASTICSEARCH=elasticsearch:9200"
-      - "HOST_KIBANA=kibana:5601"
-    depends_on: 
-      - elasticsearch
-      - kibana
-    restart: always
-    # networks:
-    #   - elk-network
-    # extra_hosts:
-    #   - "elasticsearch:172.17.0.1" # The IP of docker0 interface to access host from container
-    #   - "kibana:172.17.0.1" # The IP of docker0 interface to access host from container
-    # network_mode: host # Mandatory to monitor HOST filesystem, memory, processes,...
 
   # nginx:
   #   build: ./nginx
@@ -101,19 +95,10 @@ services:
   #   volumes:
   #     - ./nginx/config:/etc/nginx/conf.d
   #     - ./nginx/log:/var/log/nginx
+  #   deploy:
+  #     mode: global
 
-  # filebeat:
-  #   build: ./elkstack/filebeat
-  #   entrypoint: "filebeat -e -strict.perms=false"
-  #   volumes:
-  #     - ./elkstack/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
-  #     - ./nginx/log:/var/log/nginx
-  #   links:
-  #     - logstash
 
 volumes:
   esdata:
-
-networks:
-  elk-network:
-    name: elkstack
+  grafana-data:
