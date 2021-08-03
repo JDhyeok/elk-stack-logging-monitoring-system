@@ -8,13 +8,14 @@ services:
       - elasticsearch
     ports:
       - 3000:3000
-#    volumes:
-#      - ./grafana/data:/var/lib/grafana
-#      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
     environment: 
       - GF_SECURITY_ADMIN_PASSWORD=1q2w3e
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_JAVA_OPTS=-Xmx256m -Xms256m
+      - GF_INSTALL_PLUGINS=grafana-worldmap-panel
     restart: always
   # django:
   #   build:
@@ -56,19 +57,17 @@ services:
       mode: global
 
 
-  # kibana:
-  #   build: ./elkstack/kibana
-  #   restart: always
-  #   volumes:
-  #     - ./elkstack/kibana//kibana.yml:/usr/share/kibana/config/kibana.yml
-  #   ports:
-  #     - "5601:5601"
-  #   depends_on:
-  #     - elasticsearch
-  #   networks:
-  #     - elastic
-  #   deploy:
-  #     mode: global
+  kibana:
+    build: ./elkstack/kibana
+    restart: always
+    # volumes:
+      # - ./elkstack/kibana//kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    deploy:
+      mode: global
       
   logstash:
     build: ./elkstack/logstash
@@ -102,3 +101,4 @@ services:
 
 volumes:
   esdata:
+  grafana-data:
