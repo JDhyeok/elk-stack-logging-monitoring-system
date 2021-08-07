@@ -1,0 +1,1 @@
+0 3 * * * root /usr/local/bin/curator --config /curator/config.yml /curator/action.yml >> /var/log/cron.log 2>&1
