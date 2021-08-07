@@ -11,34 +11,9 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
-    environment: 
-      - GF_SECURITY_ADMIN_PASSWORD=1q2w3e
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_JAVA_OPTS=-Xmx256m -Xms256m
-      - GF_INSTALL_PLUGINS=grafana-worldmap-panel
+    env_file: 
+      - ./grafana/.env.gf
     restart: always
-  # django:
-  #   build:
-  #     context: ./mysite
-  #     args:
-  #       DJANGO_ALLOWED_HOSTS: '*'
-  #       DJANGO_SECRET_KEY: '*'
-  #       DJANGO_CORS_ORIGIN_WHITELIST: '*'
-  #   command: python manage.py runserver 0.0.0.0:8000
-  #   ports:
-  #     - 8000:8000
-  #   volumes:
-  #     - ./mysite/:/mysite/
-  #   expose:
-  #     - 8000
-  #   env_file:
-  #     - .env
-  #   deploy:
-  #     mode: global
-  #   networks:
-  #     - elastic
-  #     - app
-
 
   elasticsearch:
     build: ./elkstack/elasticsearch
@@ -51,23 +26,20 @@ services:
       - ./elkstack/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     environment:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-    # depends_on:
-    #   - django
-    deploy:
-      mode: global
 
+    
+  curator:
+    build: ./elkstack/curator
 
-  kibana:
-    build: ./elkstack/kibana
-    restart: always
-    # volumes:
-      # - ./elkstack/kibana//kibana.yml:/usr/share/kibana/config/kibana.yml
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
-    deploy:
-      mode: global
+  # kibana:
+  #   build: ./elkstack/kibana
+  #   restart: always
+  #    volumes:
+  #      - ./elkstack/kibana//kibana.yml:/usr/share/kibana/config/kibana.yml
+  #   ports:
+  #     - "5601:5601"
+  #   depends_on:
+  #     - elasticsearch
       
   logstash:
     build: ./elkstack/logstash
@@ -84,19 +56,6 @@ services:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     depends_on:
       - elasticsearch
-    deploy:
-      mode: global
-    
-
-  # nginx:
-  #   build: ./nginx
-  #   ports:
-  #     - 80:8000
-  #   volumes:
-  #     - ./nginx/config:/etc/nginx/conf.d
-  #     - ./nginx/log:/var/log/nginx
-  #   deploy:
-  #     mode: global
 
 
 volumes:
