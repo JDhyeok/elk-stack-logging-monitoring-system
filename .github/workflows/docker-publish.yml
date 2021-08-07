@@ -62,7 +62,8 @@ jobs:
       #     labels: ${{ steps.meta.outputs.labels }}
       - name: Create env file
         run : |
-          touch ./grafana/.env.gf
+          cd grafana
+          touch .env.gf
           echo GF_SECURITY_ADMIN_PASSWORD=1q2w3e >> .env
           echo GF_USERS_ALLOW_SIGN_UP=false >> .env
           echo GF_JAVA_OPTS=-Xmx256m -Xms256m >> .env
