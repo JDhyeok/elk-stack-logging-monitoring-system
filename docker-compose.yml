@@ -28,8 +28,8 @@ services:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
 
     
-  curator:
-    build: ./elkstack/curator
+  # curator:
+  #   build: ./elkstack/curator
 
 
   logstash:
